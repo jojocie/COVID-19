@@ -1,0 +1,11 @@
+rm(list=ls())
+library(tidyverse)
+setwd("~/Documents/COVID-19/")
+deaths = read.csv("csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
+confirmed = read.csv("csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
+deaths$Country.Region %>% unique() %>% sort()
+deaths_fr = deaths%>%filter(Country.Region == 'Chile') %>% select(-c(Lat,Long,Province.State,Country.Region))
+confirmed_country = confirmed%>%filter(Country.Region == 'Chile') %>% select(-c(Lat,Long,Province.State,Country.Region))
+cn = colnames(confirmed_country)
+serie = t(confirmed_country)[-(1:35)]
+plot(serie)
