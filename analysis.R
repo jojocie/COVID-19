@@ -3,8 +3,9 @@ library(tidyverse)
 #install.packages('numDeriv',dependencies = TRUE)
 library(numDeriv)
 setwd("~/Documents/COVID-19/")
-deaths = read.csv("csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
-confirmed = read.csv("csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
+deaths = read.csv("csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
+
+confirmed = read.csv("csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv")
 
 # params
 by_country = TRUE
@@ -84,12 +85,14 @@ err = function(p,x,y){
   
 }
 
+#### MODELISATION ####
+
 start_limits = seq(from = 200 , to =5000,length = 100)
 #start_limits = 3000
-indices = 10:dim(deaths)[1]
+indices = 40:dim(deaths)[1]
 j1 = 40
 j2 = 110
-pays = 'Italy'
+pays = 'France'
 
 
 
@@ -136,9 +139,9 @@ print(as.Date("2020-01-01") + p_tmp[3])
 
 
 
-plot(jours,n_deaths,xlim = c(60,100),ylim = c(0,1000), main = pays)
+plot(jours,n_deaths,xlim = c(60,100),ylim = c(0,2000), main = pays)
 par(new=T)
-plot(jours_pour_pred,mod_pred(x = jours_pour_pred,p = p_tmp),c(60,100),ylim = c(0,1000),type = 'l',main = "")
+plot(jours_pour_pred,mod_pred(x = jours_pour_pred,p = p_tmp),c(60,100),ylim = c(0,2000),type = 'l',main = "")
 grid()
 print(p_tmp)
 print(as.Date("2020-01-01") + p_tmp[3])
