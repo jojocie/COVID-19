@@ -89,10 +89,10 @@ err = function(p,x,y){
 
 start_limits = seq(from = 200 , to =5000,length = 100)
 #start_limits = 3000
-indices = 40:dim(deaths)[1]
-j1 = 40
-j2 = 110
-pays = 'France'
+indices = 10:(dim(deaths)[1]-7)
+j1 = 50
+j2 = 120
+pays = 'China'
 
 
 
@@ -104,7 +104,7 @@ v_min = .Machine$double.xmax
 p = c(3000,0.1,45)
 for (l in start_limits){
   p[1] = max(l, max(n_deaths))
-  #p[1] = l
+  #p[1] = ldeath  
 
   reg = optim(p,err,x=jours,y=n_deaths
               #,method = "L-BFGS-B"
