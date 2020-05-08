@@ -2,7 +2,7 @@
 # @Author: lily
 # @Date:   2020-04-04 15:05:37
 # @Last Modified by:   lily
-# @Last Modified time: 2020-04-14 19:11:27
+# @Last Modified time: 2020-04-27 21:09:51
 import io, os, sys, types, pickle, warnings
 from datetime import datetime, timedelta
 
@@ -159,6 +159,40 @@ def reshape_dataframe(df, time_str, **kwarg):
         df_new[~np.isfinite(df_new)] = 0
         df_new.loc[time_str[2:],'GF_rolling'] = np.divide(df_new.loc[time_str[2:],'Daily_smoothed'].to_list(), df_new.loc[time_str[1:-1],'Daily_smoothed'].to_list())
         df_new[~np.isfinite(df_new)] = 0
+    return df_new
+
+def reshape_dataframe_v2(df_confirmed, df_deaths, df_population, time_datetime):
+    df_confirmed['New_Today'] = df_confirmed[time_datetime[-1]] - df_confirmed[time_datetime[-2]]
+    df_deaths['New_Today'] = df_deaths[time_datetime[-1]] - df_deaths[time_datetime[-2]]
+    df_confirmed['Population'] = df_population
+    df_deaths['Population'] = df_population
+    df_confirmed['Per_Million'] = df_confirmed.loc[:,time_datetime[-1]] / (df_confirmed['Population']/MILLION)
+    df_deaths['Per_Million'] = df_deaths.loc[:,time_datetime[-1]] / (df_deaths['Population']/MILLION)
+    df_confirmed['GF_today'] = (df_confirmed[time_datetime[-2]] - df_confirmed[time_datetime[-1]])/(df_confirmed[time_datetime[-3]] - df_confirmed[time_datetime[-2]])
+    df_deaths['GF_today'] = (df_deaths[time_datetime[-2]] - df_deaths[time_datetime[-1]])/(df_deaths[time_datetime[-3]] - df_deaths[time_datetime[-2]])
+    df_confirmed[~np.isfinite(df_confirmed)] = 0
+    df_deaths[~np.isfinite(df_deaths)] = 0
+    return df_confirmed, df_deaths
+
+def reshape_dataframe_v3(df_test):
+    df_new = pd.DataFrame(index = df_test.index)
+    df_new['date'] = df_test['date']
+    df_new[['positive', 'negative', 'pending','recovered','death']] = df_test[['positive', 'negative', 'pending', 'recovered','death']].fillna(value = 0)
+    df_new['total'] = df_test['totalTestResults'].fillna(value = 0)
+    df_new['active'] = df_new['positive'] - (df_new['recovered'] + df_new['death'])
+    df_new['d_positive'] = df_test['positiveIncrease']
+    df_new['d_total'] = df_test['totalTestResultsIncrease']
+    if(sum(df_test['hospitalizedCurrently'].isna()) < len(df_test)):
+        df_new['hosp_cur'] = df_test[['hospitalizedCurrently', 'hospitalizedCumulative']].min(axis = 1).fillna(method = 'bfill')
+    else:
+        df_new['hosp_cur'] = df_test['hospitalizedCurrently']
+    if(sum(df_test['hospitalizedCumulative'].isna()) < len(df_test)):
+        df_new['hosp_cum'] = df_test['hospitalizedCumulative'].fillna(method = 'bfill')
+    else:
+        df_new['hosp_cum'] = df_test['hospitalizedCumulative']
+    df_new.fillna(value = 0, inplace = True)
+    df_new.sort_values(by = 'date', inplace = True, ascending=True)
+    df_new.set_index('date', inplace = True)
     return df_new
 
 def consolidate_testing(df_covid_tracking, df_state_stats):
